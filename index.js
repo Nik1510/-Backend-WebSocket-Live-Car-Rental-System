@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import bodyParser from "body-parser";
 import { authLogin, userSignup } from "./zod.validations";
 import { User } from "./db/model.db";
+import { userMiddleware } from "./middleware/userMiddleware";
 
 const app = express();
 app.use(bodyParser.json());
@@ -87,7 +88,20 @@ app.post('/auth/login', async(req,res)=>{
 
 
 app.get('/auth/me',userMiddleware,async(req,res)=>{
-
+    const user = await User.findById(req.userId);
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            message: "User not found"
+        })
+    }
+    return res.status(200).json({
+        data:{
+            id:user._id,
+            role:user.role,
+            email:user.email
+        }
+    })
 })
 
 
